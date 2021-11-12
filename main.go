@@ -8,7 +8,7 @@ import (
 	"9fans.net/go/acme"
 )
 
-var dir_tags = []byte(" als_start f gg ")
+var dir_tags = []byte(" f gg ")
 var file_tags = []byte(" als_def als_refs als_impls ")
 
 func main() {
