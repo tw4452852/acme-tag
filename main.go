@@ -8,8 +8,8 @@ import (
 	"9fans.net/go/acme"
 )
 
-var dir_tags = []byte(" f gg ")
-var file_tags = []byte(" als_def als_refs als_impls ")
+var dir_tags = []string{" f "}
+var file_tags = []string{"als_def", "als_refs"}
 
 func main() {
 	// add to existing windows
@@ -53,21 +53,31 @@ func add_tag(win_id int) error {
 	defer win.CloseFiles()
 
 	// select tags according to the path type
-	var tags []byte
+	var tags []string
 	s, err := win.ReadAll("tag")
 	if err != nil {
 		return err
 	}
-	path := strings.Fields(string(s))[0]
+
+	tagline := string(s)
+	path := strings.Fields(tagline)[0]
 	if info, err := os.Stat(path); err != nil {
 		return nil
 	} else if info.IsDir() {
-		tags = dir_tags
+		for _, tag := range dir_tags {
+			if !strings.Contains(tagline, tag) {
+				tags = append(tags, tag)
+			}
+		}
 	} else {
-		tags = file_tags
+		for _, tag := range file_tags {
+			if !strings.Contains(tagline, tag) {
+				tags = append(tags, tag)
+			}
+		}
 	}
 
-	_, err = win.Write("tag", tags)
+	_, err = win.Write("tag", []byte(strings.Join(tags, " ")))
 	if err != nil {
 		return err
 	}
