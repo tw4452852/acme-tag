@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 
 	"9fans.net/go/acme"
 )
 
 var dir_tags = []string{" f "}
-var file_tags = []string{"als_def", "als_refs"}
+var file_tags = []string{"Get", "Put", "als_refs"}
 
 func main() {
 	// add to existing windows
@@ -82,5 +84,31 @@ func add_tag(win_id int) error {
 		return err
 	}
 
+	go captureMiddleClick(win_id)
+	return nil
+}
+
+func captureMiddleClick(win_id int) error {
+	win, err := acme.Open(win_id, nil)
+	if err != nil {
+		return err
+	}
+	defer win.CloseFiles()
+
+	for event := range win.EventChan() {
+		//log.Printf("%d: %c%c %d %#x %q\n", win_id, event.C1, event.C2, event.OrigQ0, event.Flag, event.Text)
+
+		if event.C1 == 'M' && event.C2 == 'X' && event.Flag&0x1 == 0 {
+			cmd := exec.Command("als", "def")
+			cmd.Env = os.Environ()
+			cmd.Env = append(cmd.Env, fmt.Sprintf("acme_pos0=%d", event.OrigQ0))
+			cmd.Run()
+			continue
+		}
+
+		win.WriteEvent(event)
+	}
+
+	//log.Printf("%d: exit\n", win_id)
 	return nil
 }
