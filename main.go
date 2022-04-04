@@ -96,7 +96,7 @@ func captureMiddleClick(win_id int) error {
 	defer win.CloseFiles()
 
 	for event := range win.EventChan() {
-		//log.Printf("%d: %c%c %d %#x %q\n", win_id, event.C1, event.C2, event.OrigQ0, event.Flag, event.Text)
+		//log.Printf("%d: %c%c %d %d %#x %q\n", win_id, event.C1, event.C2, event.OrigQ0, event.Q0, event.Flag, event.Text)
 
 		if event.C1 == 'M' && event.C2 == 'X' && event.Flag&0x1 == 0 {
 			cmd := exec.Command("als", "def")
@@ -107,6 +107,15 @@ func captureMiddleClick(win_id int) error {
 		}
 
 		win.WriteEvent(event)
+
+		// <ctrl-s> for `Put` shortcut, this works but will block undo/redo functionality
+		if false {
+			if event.C1 == 'K' && event.C2 == 'I' && string(event.Text) == "\x13" {
+				win.Write("addr", []byte(fmt.Sprintf("#%d,#%d", event.OrigQ0, event.OrigQ0+1)))
+				win.Write("data", []byte(""))
+				win.Write("ctl", []byte("put"))
+			}
+		}
 	}
 
 	//log.Printf("%d: exit\n", win_id)
