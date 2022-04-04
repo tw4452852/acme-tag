@@ -63,6 +63,7 @@ func add_tag(win_id int) error {
 
 	tagline := string(s)
 	path := strings.Fields(tagline)[0]
+	is_file := false
 	if info, err := os.Stat(path); err != nil {
 		return nil
 	} else if info.IsDir() {
@@ -77,6 +78,7 @@ func add_tag(win_id int) error {
 				tags = append(tags, tag)
 			}
 		}
+		is_file = true
 	}
 
 	_, err = win.Write("tag", []byte(strings.Join(tags, " ")))
@@ -84,7 +86,9 @@ func add_tag(win_id int) error {
 		return err
 	}
 
-	go captureMiddleClick(win_id)
+	if is_file {
+		go captureMiddleClick(win_id)
+	}
 	return nil
 }
 
@@ -98,6 +102,7 @@ func captureMiddleClick(win_id int) error {
 	for event := range win.EventChan() {
 		//log.Printf("%d: %c%c %d %d %#x %q\n", win_id, event.C1, event.C2, event.OrigQ0, event.Q0, event.Flag, event.Text)
 
+		// middle click on the file's body which isn't recognized as acme's builtin cmd triggers als_def
 		if event.C1 == 'M' && event.C2 == 'X' && event.Flag&0x1 == 0 {
 			cmd := exec.Command("als", "def")
 			cmd.Env = os.Environ()
