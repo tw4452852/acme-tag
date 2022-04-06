@@ -107,6 +107,7 @@ func captureMiddleClick(win_id int) error {
 			cmd := exec.Command("als", "def")
 			cmd.Env = os.Environ()
 			cmd.Env = append(cmd.Env, fmt.Sprintf("acme_pos0=%d", event.OrigQ0))
+			cmd.Env = append(cmd.Env, fmt.Sprintf("winid=%d", win_id))
 			cmd.Run()
 			continue
 		}
