@@ -8,7 +8,7 @@ import (
 	"9fans.net/go/acme"
 )
 
-var dir_tags = []string{" gf "}
+var dir_tags = []string{"gf"}
 var file_tags = []string{"Get", "als_def", "als_refs"}
 
 func main() {
@@ -61,9 +61,9 @@ func add_tag(win_id int) error {
 
 	tagline := string(s)
 	path := strings.Fields(tagline)[0]
-	if info, err := os.Stat(path); err != nil {
+	if info, err := os.Stat(path); err != nil && path[0] != '/' {
 		return nil
-	} else if info.IsDir() {
+	} else if info != nil && info.IsDir() {
 		for _, tag := range dir_tags {
 			if !strings.Contains(tagline, tag) {
 				tags = append(tags, tag)
